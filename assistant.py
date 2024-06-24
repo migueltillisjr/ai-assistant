@@ -32,12 +32,6 @@ openai.api_key = OPENAI_API_KEY
 
 LOGFILE = 'AssistantLog.md'  # We'll store all interactions in this file
 
-def current_date():
-    # Get the current date and time in UTC
-    current_gmt_datetime = datetime.now(timezone.utc)
-    # Format the date as YYYY-MM-DD
-    formatted_date_gmt = current_gmt_datetime.strftime('%Y-%m-%d')
-    return formatted_date_gmt
 
 class Assistant:
     def __init__(self):

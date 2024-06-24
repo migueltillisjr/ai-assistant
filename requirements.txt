@@ -1,3 +1,4 @@
+openai==1.35.3
 annotated-types
 charset-normalizer
 et-xmlfile
