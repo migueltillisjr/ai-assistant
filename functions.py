@@ -15,15 +15,7 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 fqdn = "randomfqdn.infopioneer.dev"
 
 
-def current_date():
-    # Get the current date and time in UTC
-    current_gmt_datetime = datetime.now(timezone.utc)
-    # Format the date as YYYY-MM-DD
-    formatted_date_gmt = current_gmt_datetime.strftime('%Y-%m-%d')
-    return formatted_date_gmt
-
-
-def chatgpt_parse_date(phrase):
+def chatgpt_completions_example(phrase):
     # Send the phrase to ChatGPT to get a more straightforward date expression
     response = completion = client.chat.completions.create(
       #model="gpt-3.5-turbo",
@@ -33,7 +25,6 @@ def chatgpt_parse_date(phrase):
           {"role": "user", "content": f"Extract and clarify the date and convirt the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
       ]
     )
-
     return response.choices[0].message.content.strip()
 
 
@@ -85,4 +76,4 @@ class Functions:
 
 
 if __name__ == '__main__':
-    print(chatgpt_parse_date("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))
+    print(chatgpt_completions_example("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))
