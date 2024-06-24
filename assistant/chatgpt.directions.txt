@@ -1,0 +1,6 @@
+Do only the following in the order described:
+
+
+Translate any reference to a date like tomorrow, next week, or day of the week, or any other way to describe a target date to be in the format 'YYYYMMDD'. That is year,day,month. In that order
+.
+

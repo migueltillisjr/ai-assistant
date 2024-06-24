@@ -18,84 +18,20 @@ When creating the assistant, this module also stores the Assistant ID in .env, s
 REQUIREMENT: You will need an OPENAI_API_KEY, which should be stored in .env
     See https://platform.openai.com/api-keys
 """
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 import json
 import os
 import time
-from datetime import datetime
-from openai import OpenAI
-from functions import Functions
-#dotenv.load_dotenv()
-#OpenAI.api_key = os.getenv('OPENAI_API_KEY')
-OPENAI_API_KEY="Use your own key!!!"
-#OpenAI.api_key = ""
-OpenAI.api_key=OPENAI_API_KEY
-print(OpenAI.api_key)
-ASSISTANT_ID = "asst_mh5wf4nJPDgpvBK8lAF8jCU6"
+import openai
+from assistant.functions import Functions
 
-LOGFILE = 'AssistantLog.md'  # We'll store all interactions in this file
-AI_RESPONSE = '-AIresponse-'  # GUI event key for Assistant responses
-directions=str()
+# Replace with your own OpenAI API key
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+openai.api_key = OPENAI_API_KEY
 
+LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this file
 
-def current_date():
-    # Get the current date and time in UTC
-    current_gmt_datetime = datetime.now(timezone.utc)
-    # Format the date as YYYY-MM-DD
-    formatted_date_gmt = current_gmt_datetime.strftime('%Y-%m-%d')
-    return formatted_date_gmt
-
-
-def chatgpt_parse_date(phrase):
-    OpenAI.api_key = os.getenv('OPENAI_API_KEY')
-    client = OpenAI()
-    # Send the phrase to ChatGPT to get a more straightforward date expression
-    response = completion = client.chat.completions.create(
-      #model="gpt-3.5-turbo",
-      model="gpt-4",
-      messages=[
-          {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract and clarify the date and convirt the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
-      ]
-    )
-
-    return response.choices[0].message.content.strip()
-
-
-def chatgpt_parse_response(message):
-    OpenAI.api_key = os.getenv('OPENAI_API_KEY')
-    client = OpenAI()
-    # Send the phrase to ChatGPT to get a more straightforward date expression
-    response = completion = client.chat.completions.create(
-      #model="gpt-3.5-turbo",
-      model="gpt-4",
-      messages=[
-          {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract the text here and convert to a purely text string and only the text string. Do not return as markup."}
-          #{"role": "user", "content": f"Extract the text here and convert to a purely JSON string and only the json string. Do not return as markup."}
-      ]
-    )
-
-    return response.choices[0].message.content.strip()
-
-
-def chatgpt_parse_filename(message):
-    OpenAI.api_key = os.getenv('OPENAI_API_KEY')
-    client = OpenAI()
-    # Send the phrase to ChatGPT to get a more straightforward date expression
-    response = completion = client.chat.completions.create(
-      #model="gpt-3.5-turbo",
-      model="gpt-4",
-      messages=[
-          {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract the text here that represents a file name and convert to a purely JSON string and only the json string. Do not return as markup."}
-      ]
-    )
-
-    return response.choices[0].message.content.strip()
-
-
-with open('chatgpt.directions.txt', 'r') as file:
+with open('assistant/chatgpt.directions.txt', 'r') as file:
     directions = file.read()
 
 def show_json(obj):
@@ -103,67 +39,14 @@ def show_json(obj):
     return json.dumps(json.loads(obj.model_dump_json()), indent=2)
 
 class Assistant:
-    def __init__(self):
-        while OpenAI.api_key is None:
-            #input("Hey! Couldn't find OPENAI_API_KEY. Put it in .env then press any key to try again...")
-            #dotenv.load_dotenv()
-            OpenAI.api_key = os.getenv('OPENAI_API_KEY')
-        self.client = OpenAI()
-        self.run = None
-        self.message = None
-        global ASSISTANT_ID
-        if ASSISTANT_ID is None:  # Create the assistant
-            assistant = self.client.beta.assistants.create(
-                name="Random Assistant",
-                instructions=directions + "\n format all responses in json only",
-                model="gpt-4",
-                tools=[
-                    {"type": "code_interpreter"},
-                    {"type": "function", "function": Functions.get_random_digit_JSON},
-                    {"type": "function", "function": Functions.get_random_letters_JSON},
-                    {"type": "function", "function": Functions.get_reports_JSON},
-                    {"type": "function", "function": Functions.delete_campaigns_JSON},
-                    {"type": "function", "function": Functions.list_campaigns_JSON},
-                    {"type": "function", "function": Functions.schedule_email_campaign_JSON},
-                    {"type": "function", "function": Functions.show_help_JSON},
-                    {"type": "function", "function": Functions.update_contacts_JSON},
-                    {"type": "function", "function": Functions.get_email_editor_JSON},
-                    {"type": "function", "function": Functions.get_sample_email_text_JSON},
-                    {"type": "function", "function": Functions.get_reports_JSON},
-                    {"type": "function", "function": Functions.get_archived_reports_JSON},
-                    {"type": "function", "function": Functions.get_archived_contact_lists_JSON},
-                    {"type": "function", "function": Functions.get_archived_email_designs_JSON},
-                    {"type": "function", "function": Functions.get_contact_csv_JSON},
-                       ]
-            )
-            # Store the new assistant.id in .env
-            #dotenv.set_key('.env', 'ASSISTANT_ID', assistant.id)
-            ASSISTANT_ID = assistant.id
-        else:
-            assistant = self.client.beta.assistants.update(
-                assistant_id=ASSISTANT_ID,
-                name="Random Assistant",
-                instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
-                model="gpt-4",
-                tools=[
-                    {"type": "code_interpreter"},
-                    {"type": "function", "function": Functions.get_random_digit_JSON},
-                    {"type": "function", "function": Functions.get_random_letters_JSON},
-                    {"type": "function", "function": Functions.get_reports_JSON},
-                    {"type": "function", "function": Functions.delete_campaigns_JSON},
-                    {"type": "function", "function": Functions.list_campaigns_JSON},
-                    {"type": "function", "function": Functions.schedule_email_campaign_JSON},
-                    {"type": "function", "function": Functions.show_help_JSON},
-                    {"type": "function", "function": Functions.update_contacts_JSON},
-                    {"type": "function", "function": Functions.get_email_editor_JSON},
-                    {"type": "function", "function": Functions.get_sample_email_text_JSON},
-                    {"type": "function", "function": Functions.get_archived_reports_JSON},
-                    {"type": "function", "function": Functions.get_archived_contact_lists_JSON},
-                    {"type": "function", "function": Functions.get_archived_email_designs_JSON},
-                    {"type": "function", "function": Functions.get_contact_csv_JSON},
-                       ]
-            )
+    def __init__(self, assistant_id=None):
+        while openai.api_key is None:
+            openai.api_key = os.getenv('OPENAI_API_KEY')
+        self.client = openai
+        self.ASSISTANT_ID = assistant_id
+        self.build_assistant()
         self.create_AI_thread()
+
 
     def create_AI_thread(self):
         """Creates an OpenAI Assistant thread, which maintains context for a user's interactions."""
@@ -172,6 +55,40 @@ class Assistant:
         print(show_json(self.thread))
         with open(LOGFILE, 'a+') as f:
             f.write(f'# {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
+
+
+    def build_assistant(self):
+        if not self.ASSISTANT_ID:  # Create the assistant
+            print('Creating assistant...')
+            assistant = self.client.beta.assistants.create(
+                name="Ai Assistant",
+                instructions=directions + "\n format all responses in json only",
+                model="gpt-4",
+                tools=[
+                    {"type": "code_interpreter"},
+                    {"type": "function", "function": Functions.get_random_digit_JSON},
+                    {"type": "function", "function": Functions.get_random_letters_JSON},
+                       ]
+            )
+            # Store the new assistant.id in .env
+            self.ASSISTANT_ID = assistant.id
+            print("ASSITANT ID:")
+            print(self.ASSISTANT_ID)
+        else:
+            assistant = self.client.beta.assistants.update(
+                assistant_id=self.ASSISTANT_ID,
+                name="Ai Assistant",
+                instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
+                model="gpt-4",
+                tools=[
+                    {"type": "code_interpreter"},
+                    {"type": "function", "function": Functions.get_random_digit_JSON},
+                    {"type": "function", "function": Functions.get_random_letters_JSON},
+                       ]
+            )
+            print("ASSITANT ID:")
+            print(self.ASSISTANT_ID)
+
 
     def wait_on_run(self, ):
         """Waits for an OpenAI assistant run to finish and handles the response."""
@@ -194,20 +111,18 @@ class Assistant:
             return output
         else:
             # Get messages added after our last user message
-            new_messages = self.client.beta.threads.messages.list(thread_id=self.thread.id, order="asc", after=self.message.id)
+            new_messages = self.client.threads.messages.list(thread_id=self.thread.id, order="asc", after=self.message.id)
             response = list()
             with open(LOGFILE, 'a+') as f:
                 f.write('\n**Assistant**:\n')
                 for m in new_messages:
                     msg = m.content[0].text.value
-                    #print()
-                    #print(msg)
                     f.write(msg)
                     response.append(msg)
                 f.write('\n\n---\n')
             # Callback to GUI with list of messages added after the user message we sent
-            #return chatgpt_parse_response(''.join(response))
             return str(response).replace('```json', '').replace('```', '').replace('\\n', '')
+
 
     def send_message(self, message_text: str):
         """
@@ -216,46 +131,16 @@ class Assistant:
         Parameters
         ----------
         """
-        self.message = self.client.beta.threads.messages.create(self.thread.id,
-                                                role = "user",
-                                                content = message_text + " " + chatgpt_parse_date(message_text))
+        self.message = self.client.beta.threads.messages.create(self.thread.id, role = "user", content = message_text)
         print('\nSending:\n' + show_json(self.message))
-        self.run = self.client.beta.threads.runs.create(thread_id=self.thread.id, assistant_id=ASSISTANT_ID)
+        self.run = self.client.beta.threads.runs.create(thread_id=self.thread.id, assistant_id=self.ASSISTANT_ID)
         with open(LOGFILE, 'a+') as f:
             f.write(f'**User:** `{message_text}`\n')
 
 
 if __name__ == '__main__':
-    #AI.send_message("give me a random number to include in my subject name")
 
-    #AI = Assistant()
-    #AI.send_message("List campaigns")
-    #print(AI.wait_on_run())
-
-    #AI = Assistant()
-    #AI.send_message("Delete campaigns: 20243103-E3-Campaign1, 20243104")
-    #print(AI.wait_on_run())
-
-    #AI = Assistant()
-    #AI.send_message("return 3 random letters.")
-    #print(AI.wait_on_run())
-
-    #AI = Assistant()
-    #AI.send_message("delete the campaigns. campaigns: [20243103-E3-Campaign1, 20243103-E3-Campaign1,]")
-    #print(AI.wait_on_run())
-
-    #AI = Assistant()
-    #AI.send_message("generate report")
-    #print(AI.wait_on_run())
-
-    AI = Assistant()
-    AI.send_message("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign tomorrow")
+    AI = Assistant("asst_KxXiqpptZ1pPBJray6lmoiFv")
+    AI.send_message("return 3 random letters.")
     print(AI.wait_on_run())
-    AI = Assistant()
-    AI.send_message("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign this friday")
-    print(AI.wait_on_run())
-    #"emails"
-    #"subject"
-    #"scheduledAt"
-    #"sender_name"
-    #"test"
+
