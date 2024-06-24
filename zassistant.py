@@ -39,47 +39,14 @@ def show_json(obj):
     return json.dumps(json.loads(obj.model_dump_json()), indent=2)
 
 class Assistant:
-    def __init__(self):
+    def __init__(self, assistant_id=None):
         while openai.api_key is None:
             openai.api_key = os.getenv('OPENAI_API_KEY')
         self.client = openai
-        self.ASSISTANT_ID = None
+        self.ASSISTANT_ID = assistant_id
+        self.build_assistant()
         self.create_AI_thread()
 
-    def create_AI_thread(self):
-        """Creates an OpenAI Assistant thread, which maintains context for a user's interactions."""
-        print('Creating assistant thread...')
-        self.thread = {"id": "dummy_thread_id"}  # Simulate thread creation
-        with open(LOGFILE, 'a+') as f:
-            f.write(f'# {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread["id"]}\n\n')
-        #if not self.ASSISTANT_ID:  # Create the assistant
-        print('Creating assistant...')
-        assistant = self.client.beta.assistants.create(
-            name="Ai Assistant",
-            instructions=directions + "\n format all responses in json only",
-            model="gpt-4",
-            tools=[
-                {"type": "code_interpreter"},
-                {"type": "function", "function": Functions.get_random_digit_JSON},
-                {"type": "function", "function": Functions.get_random_letters_JSON},
-                   ]
-        )
-        # Store the new assistant.id in .env
-        self.ASSISTANT_ID = assistant.id
-        print("ASSITANT ID::")
-        print(self.ASSISTANT_ID)
-        #else:
-        #    assistant = self.client.assistants.update(
-        #        assistant_id=self.ASSISTANT_ID,
-        #        name="Ai Assistant",
-        #        instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
-        #        model="gpt-4",
-        #        tools=[
-        #            {"type": "code_interpreter"},
-        #            {"type": "function", "function": Functions.get_random_digit_JSON},
-        #            {"type": "function", "function": Functions.get_random_letters_JSON},
-        #               ]
-        #    )
 
     def create_AI_thread(self):
         """Creates an OpenAI Assistant thread, which maintains context for a user's interactions."""
@@ -89,11 +56,45 @@ class Assistant:
         with open(LOGFILE, 'a+') as f:
             f.write(f'# {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
 
+
+    def build_assistant(self):
+        if not self.ASSISTANT_ID:  # Create the assistant
+            print('Creating assistant...')
+            assistant = self.client.beta.assistants.create(
+                name="Ai Assistant",
+                instructions=directions + "\n format all responses in json only",
+                model="gpt-4",
+                tools=[
+                    {"type": "code_interpreter"},
+                    {"type": "function", "function": Functions.get_random_digit_JSON},
+                    {"type": "function", "function": Functions.get_random_letters_JSON},
+                       ]
+            )
+            # Store the new assistant.id in .env
+            self.ASSISTANT_ID = assistant.id
+            print("ASSITANT ID:")
+            print(self.ASSISTANT_ID)
+        else:
+            assistant = self.client.beta.assistants.update(
+                assistant_id=self.ASSISTANT_ID,
+                name="Ai Assistant",
+                instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
+                model="gpt-4",
+                tools=[
+                    {"type": "code_interpreter"},
+                    {"type": "function", "function": Functions.get_random_digit_JSON},
+                    {"type": "function", "function": Functions.get_random_letters_JSON},
+                       ]
+            )
+            print("ASSITANT ID:")
+            print(self.ASSISTANT_ID)
+
+
     def wait_on_run(self, ):
         """Waits for an OpenAI assistant run to finish and handles the response."""
         print('Waiting for assistant response...')
         while self.run.status == "queued" or self.run.status == "in_progress":
-            self.run = self.client.threads.runs.retrieve(thread_id=self.thread.id, run_id=self.run.id)
+            self.run = self.client.beta.threads.runs.retrieve(thread_id=self.thread.id, run_id=self.run.id)
             time.sleep(1)
         if self.run.status == "requires_action":
             print(f'\nASSISTANT REQUESTS {len(self.run.required_action.submit_tool_outputs.tool_calls)} TOOLS:')
@@ -106,7 +107,7 @@ class Assistant:
                 output = getattr(Functions, name)(**arguments)
                 tool_outputs.append({"tool_call_id": tool_call_id, "output": json.dumps(output)})
                 print(f'\n\tReturning {output}')
-            self.run = self.client.threads.runs.submit_tool_outputs(thread_id=self.thread.id, run_id=self.run.id, tool_outputs=tool_outputs)
+            self.run = self.client.beta.threads.runs.submit_tool_outputs(thread_id=self.thread.id, run_id=self.run.id, tool_outputs=tool_outputs)
             return output
         else:
             # Get messages added after our last user message
@@ -116,14 +117,12 @@ class Assistant:
                 f.write('\n**Assistant**:\n')
                 for m in new_messages:
                     msg = m.content[0].text.value
-                    #print()
-                    #print(msg)
                     f.write(msg)
                     response.append(msg)
                 f.write('\n\n---\n')
             # Callback to GUI with list of messages added after the user message we sent
-            #return chatgpt_parse_response(''.join(response))
             return str(response).replace('```json', '').replace('```', '').replace('\\n', '')
+
 
     def send_message(self, message_text: str):
         """
@@ -141,49 +140,7 @@ class Assistant:
 
 if __name__ == '__main__':
 
-    AI = Assistant()
+    AI = Assistant("asst_KxXiqpptZ1pPBJray6lmoiFv")
     AI.send_message("return 3 random letters.")
-    print(AI.wait_on_run())
-
-
-
-    def wait_on_run(self):
-        """Waits for an OpenAI assistant run to finish and handles the response."""
-        print('Waiting for assistant response...')
-        response = self.run
-        new_messages = response.choices
-        response_text = ""
-        with open(LOGFILE, 'a+') as f:
-            f.write('\n**Assistant**:\n')
-            for m in new_messages:
-                msg = m.message["content"]
-                f.write(msg)
-                response_text += msg
-            f.write('\n\n---\n')
-        return response_text
-
-    def send_message(self, message_text: str):
-        """
-        Send a message to the assistant.
-
-        Parameters
-        ----------
-        message_text: str
-            The message to send to the assistant.
-        """
-        print(f'\nSending message: {message_text}')
-        self.run = self.client.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": message_text}
-            ]
-        )
-        with open(LOGFILE, 'a+') as f:
-            f.write(f'**User:** `{message_text}`\n')
-
-if __name__ == '__main__':
-    AI = Assistant()
-    AI.send_message("Give me a random number")
     print(AI.wait_on_run())
 
