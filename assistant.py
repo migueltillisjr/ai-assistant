@@ -23,15 +23,15 @@ import json
 import os
 import time
 import openai
-from functions import Functions
+from assistant.functions import Functions
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 openai.api_key = OPENAI_API_KEY
 
-LOGFILE = 'AssistantLog.md'  # We'll store all interactions in this file
+LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this file
 
-with open('chatgpt.directions.txt', 'r') as file:
+with open('assistant/chatgpt.directions.txt', 'r') as file:
     directions = file.read()
 
 def show_json(obj):
