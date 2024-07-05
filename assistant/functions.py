@@ -9,9 +9,11 @@ from flask import Flask, jsonify, request, render_template
 from functools import wraps
 import string
 import random
-
+import emoji
+import requests
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 fqdn = "randomfqdn.infopioneer.dev"
 
 
@@ -22,7 +24,7 @@ def chatgpt_completions_example(phrase):
       model="gpt-4",
       messages=[
           {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract and clarify the date and convirt the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
+          {"role": "user", "content": f"Extract and clarify the date and convert the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
       ]
     )
     return response.choices[0].message.content.strip()
@@ -56,6 +58,42 @@ class Functions:
             "required": ["count"]
         }
     }
+
+    def get_random_emoji(count: 3):
+        emoji_list = ['😭', '😊', '😎', '🤩', '😁', '👍', '🔥', '🙏']
+        return ''.join(random.choices(emoji_list, k=count))
+    
+    get_random_emoji_JSON = {
+        "name": "get_random_emoji",
+        "description": "Get a string of a random emoji",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "count": {"type": "integer", "description": "Number of emojis to return"},
+            },
+            "required": ["count"]
+        }
+    }
+
+    def get_instagram_user_info():
+        access_token = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+        user_info_url = f"https://graph.instagram.com/me?fields=id,media_type,media_url,username,timestamp&access_token={access_token}"
+        
+        response = requests.get(user_info_url)
+        if response.status_code == 200:
+            user_info = response.json()
+            return user_info 
+
+    get_instagram_user_info_JSON = {
+        "name": "get_instagram_user_info",
+        "description": "Get user information of prompted instagram user",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        }
+    }
+    
+
 
 
     def show_help():
