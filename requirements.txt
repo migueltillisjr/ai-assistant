@@ -17,3 +17,4 @@ scikit-learn
 trio-websocket
 types-pytz
 typing-extensions
+praw
