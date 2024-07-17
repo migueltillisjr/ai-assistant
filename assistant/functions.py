@@ -11,6 +11,7 @@ import string
 import random
 import emoji
 import requests
+from .reddit import get_reddit_instance, get_subreddit_info, get_user_info
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
@@ -115,3 +116,13 @@ class Functions:
 
 if __name__ == '__main__':
     print(chatgpt_completions_example("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))
+    
+    client_id = 'An62bVeTYec8Z19gyBOrtg'
+    client_secret = 'VLwPcm9GUHHidlqCIbN7GJ7cqpGZ4w'
+    user_agent = 'AI-assistant Integration/0.1 by CarbonMonoxide_0'
+    
+    reddit = get_reddit_instance(client_id, client_secret, user_agent)
+    
+
+    subreddit_name = "wallstreetbets"
+    get_subreddit_info(reddit, subreddit_name)   
