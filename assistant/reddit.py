@@ -1,11 +1,16 @@
 #!/usr/bin/env python3.11
 
+import os
 import praw
 import nltk
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize 
 from collections import Counter 
 import string 
+
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+USER_AGENT = os.getenv("USER_AGENT")
 
 def get_reddit_instance(client_id, client_secret, user_agent):
     return praw.Reddit(client_id=client_id,
@@ -69,11 +74,8 @@ def get_keywords(posts):
 
 
 if __name__ == "__main__":
-    client_id = 'An62bVeTYec8Z19gyBOrtg'
-    client_secret = 'VLwPcm9GUHHidlqCIbN7GJ7cqpGZ4w'
-    user_agent = 'AI-assistant Integration/0.1 by CarbonMonoxide_0'
     
-    reddit = get_reddit_instance(client_id, client_secret, user_agent)
+    reddit = get_reddit_instance(CLIENT_ID, CLIENT_SECRET, USER_AGENT)
     
     username = 'CarbonMonoxide_0'  # Replace with the username you want to look up
    # user_info = get_user_info(reddit, username)
