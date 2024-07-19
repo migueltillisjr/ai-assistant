@@ -28,13 +28,14 @@ from assistant.functions import Functions
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+
 openai.api_key = OPENAI_API_KEY
 
 LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this file
 
 # opens the GPT's instructions
 print("Opens GPT instructions")
-with open('C:\\Users\\suhai\\Documents\\AI-assistant\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
+with open('C:\\Users\\suhai\\Documents\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
     directions = file.read()
 
 def show_json(obj):
@@ -149,6 +150,6 @@ class Assistant:
 if __name__ == '__main__':
 
     AI = Assistant()
-    AI.send_message("return instagram user information from instagram account suhaibsadak1")
+    AI.send_message("return subreddit information from wallstreetbets")
     print(AI.wait_on_run())
 
