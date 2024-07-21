@@ -27,11 +27,15 @@ from assistant.functions import Functions
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+
 openai.api_key = OPENAI_API_KEY
 
 LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this file
 
-with open('assistant/chatgpt.directions.txt', 'r') as file:
+# opens the GPT's instructions
+print("Opens GPT instructions")
+with open('C:\\Users\\suhai\\Documents\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
     directions = file.read()
 
 def show_json(obj):
@@ -53,8 +57,9 @@ class Assistant:
         print('Creating assistant thread...')
         self.thread = self.client.beta.threads.create()
         print(show_json(self.thread))
+
         with open(LOGFILE, 'a+') as f:
-            f.write(f'# {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
+          f.write(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
 
 
     def build_assistant(self):
@@ -68,7 +73,9 @@ class Assistant:
                     {"type": "code_interpreter"},
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
-                       ]
+                    {"type": "function", "function": Functions.get_random_emoji_JSON},
+                    {"type": "function", "function": Functions.get_instagram_user_info_JSON}
+                      ]
             )
             # Store the new assistant.id in .env
             self.ASSISTANT_ID = assistant.id
@@ -84,7 +91,9 @@ class Assistant:
                     {"type": "code_interpreter"},
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
-                       ]
+                    {"type": "function", "function": Functions.get_random_emoji_JSON},
+                    {"type": "function", "function": Functions.get_instagram_user_info_JSON}
+                    ]
             )
             print("ASSITANT ID:")
             print(self.ASSISTANT_ID)
@@ -111,7 +120,7 @@ class Assistant:
             return output
         else:
             # Get messages added after our last user message
-            new_messages = self.client.threads.messages.list(thread_id=self.thread.id, order="asc", after=self.message.id)
+            new_messages = self.client.beta.threads.messages.list(thread_id=self.thread.id, order="asc", after=self.message.id)
             response = list()
             with open(LOGFILE, 'a+') as f:
                 f.write('\n**Assistant**:\n')
@@ -122,7 +131,7 @@ class Assistant:
                 f.write('\n\n---\n')
             # Callback to GUI with list of messages added after the user message we sent
             return str(response).replace('```json', '').replace('```', '').replace('\\n', '')
-
+            f.write('\n\n---\n')
 
     def send_message(self, message_text: str):
         """
@@ -140,7 +149,7 @@ class Assistant:
 
 if __name__ == '__main__':
 
-    AI = Assistant("asst_KxXiqpptZ1pPBJray6lmoiFv")
-    AI.send_message("return 3 random letters.")
+    AI = Assistant()
+    AI.send_message("return subreddit information from wallstreetbets")
     print(AI.wait_on_run())
 

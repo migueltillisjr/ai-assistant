@@ -9,9 +9,16 @@ from flask import Flask, jsonify, request, render_template
 from functools import wraps
 import string
 import random
-
+import emoji
+import requests
+from .reddit import get_reddit_instance, get_subreddit_info, get_user_info, get_keywords
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+USER_AGENT = os.getenv("USER_AGENT")
+
 fqdn = "randomfqdn.infopioneer.dev"
 
 
@@ -22,7 +29,7 @@ def chatgpt_completions_example(phrase):
       model="gpt-4",
       messages=[
           {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract and clarify the date and convirt the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
+          {"role": "user", "content": f"Extract and clarify the date and convert the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
       ]
     )
     return response.choices[0].message.content.strip()
@@ -57,6 +64,42 @@ class Functions:
         }
     }
 
+    def get_random_emoji(count: 3):
+        emoji_list = ['😭', '😊', '😎', '🤩', '😁', '👍', '🔥', '🙏']
+        return ''.join(random.choices(emoji_list, k=count))
+    
+    get_random_emoji_JSON = {
+        "name": "get_random_emoji",
+        "description": "Get a string of a random emoji",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "count": {"type": "integer", "description": "Number of emojis to return"},
+            },
+            "required": ["count"]
+        }
+    }
+
+    def get_instagram_user_info():
+        access_token = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+        user_info_url = f"https://graph.instagram.com/me?fields=id,media_type,media_url,username,timestamp&access_token={access_token}"
+        
+        response = requests.get(user_info_url)
+        if response.status_code == 200:
+            user_info = response.json()
+            return user_info 
+
+    get_instagram_user_info_JSON = {
+        "name": "get_instagram_user_info",
+        "description": "Get user information of prompted instagram user",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        }
+    }
+    
+
+
 
     def show_help():
         __help = [
@@ -77,3 +120,18 @@ class Functions:
 
 if __name__ == '__main__':
     print(chatgpt_completions_example("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))
+    
+
+    reddit = get_reddit_instance(CLIENT_ID, CLIENT_SECRET, USER_AGENT)
+    
+
+    subreddit_name = "wallstreetbets"
+    posts = get_subreddit_info(reddit, subreddit_name)   
+
+    if posts:
+        keywords = get_keywords(posts)
+        print("Popular keywords:")
+        for word, amount in keywords:
+            print(f"{word}: {amount}")
+    else:
+        print("Failed to retrieve user information.")
