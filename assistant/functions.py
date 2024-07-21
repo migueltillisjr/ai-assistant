@@ -10,7 +10,7 @@ from functools import wraps
 import string
 import random
 import requests
-from reddit import get_reddit_instance, get_subreddit_info, get_user_info, get_keywords
+from .reddit import get_reddit_instance, get_subreddit_info, get_user_info, get_keywords
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')

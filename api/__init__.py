@@ -1,8 +1,7 @@
 #!/usr/bin/env python3.11
 from flask import Flask, jsonify, request, render_template
 from functools import wraps
-from gen_report import initiate
-from assistant import Assistant
+# from assistant import Assistant
 from flask_cors import CORS
 
 app = Flask(__name__, template_folder="/var/www/html/uploads")
@@ -27,11 +26,13 @@ def home():
 @app.route('/assistant', methods=['POST'])  # Route for the root URL
 def assistant():
     data = request.json
-    AI = Assistant()
-    AI.send_message(data['message'])
+    # AI = Assistant()
+    # AI.send_message(data['message'])
     #AI.send_message(data)
-    message = AI.wait_on_run()
+    # message = AI.wait_on_run()
+    # return jsonify({"message": message})
     return jsonify({"message": message})
+
 
 
 @app.route('/upload', methods=['POST'])
@@ -55,6 +56,8 @@ def upload_contacts():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+def run():
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    run()

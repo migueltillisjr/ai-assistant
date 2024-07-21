@@ -23,7 +23,7 @@ import json
 import os
 import time
 import openai
-from functions import Functions
+from .functions import Functions
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
