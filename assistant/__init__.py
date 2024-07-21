@@ -28,6 +28,7 @@ from functions import Functions
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+GPT_DIRECTIONS = os.getenv('GPT_DIRECTIONS')
 
 openai.api_key = OPENAI_API_KEY
 
@@ -35,7 +36,7 @@ LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this fi
 
 # opens the GPT's instructions
 print("Opens GPT instructions")
-with open('C:\\Users\\suhai\\Documents\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
+with open(GPT_DIRECTIONS, 'r') as file:
     directions = file.read()
 
 def show_json(obj):

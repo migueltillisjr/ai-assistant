@@ -19,3 +19,4 @@ types-pytz
 typing-extensions
 praw
 streamlit-authenticator
+nltk
