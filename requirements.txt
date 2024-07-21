@@ -18,3 +18,4 @@ trio-websocket
 types-pytz
 typing-extensions
 praw
+streamlit-authenticator
