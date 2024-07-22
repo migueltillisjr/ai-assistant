@@ -16,7 +16,7 @@ python3.11 -m assistant
 python3.11 -m assistant.integrations.reddit
 
 # UI, login info location -> ui/.streamlit/secrets.toml
-cd ui/
+cd assistant/ui/
 streamlit run __main__.py
 
 # API
