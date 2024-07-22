@@ -14,7 +14,7 @@ ai-assistant
 # Assistant
 python3.11 -m assistant
 
-# UI
+# UI, login info location -> ui/.streamlit/secrets.toml
 cd ui/
 streamlit run __main__.py
 
