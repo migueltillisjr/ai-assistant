@@ -1,0 +1,1 @@
+To get stock information for a given company, use the following API endpoint: `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=equity`. Replace `equity` with the ticker symbol of the company you are interested in.

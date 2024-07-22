@@ -13,7 +13,8 @@ import emoji
 import requests
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
-INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+# INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
 fqdn = "randomfqdn.infopioneer.dev"
 
 
@@ -93,6 +94,26 @@ class Functions:
         }
     }
     
+    def get_weekly_stock_info(equity: str):
+        access_token = ALPHAVANTAGE_KEY
+        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol={equity}&apikey={access_token}'
+        response = requests.get(url)
+        if response.raise_for_status() == None:
+            market_data = response.json()
+            return market_data["Weekly Time Series"]
+        
+    get_weekly_stock_info_JSON = {
+        "name":"get_weekly_stock_info",
+        "description":"Gets weekly stock info requested from the user",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "equity": {"type": "string", "description":"Name of equity to track"}
+            },
+            "required":["equity"]
+        }
+    }
+
 
 
 
