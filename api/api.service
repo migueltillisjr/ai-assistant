@@ -1,0 +1,16 @@
+[Unit]
+Description=API Service
+After=network.target
+
+[Service]
+Environment="OPENAI_API_KEY=YOUR_KEY"
+ExecStart=/var/www/html/api.py
+WorkingDirectory=/var/www/html
+User=dev
+Group=dev
+Restart=on-failure
+StandardOutput=file:/var/log/api/api.log
+StandardError=file:/var/log/api/api.log
+
+[Install]
+WantedBy=multi-user.target
