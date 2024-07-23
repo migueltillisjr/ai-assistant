@@ -13,7 +13,7 @@ import emoji
 import requests
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
-# INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
 fqdn = "randomfqdn.infopioneer.dev"
 

@@ -34,10 +34,10 @@ openai.api_key = OPENAI_API_KEY
 LOGFILE = 'assistant/AssistantLog.md'  # We'll store all interactions in this file
 
 # opens the GPT's instructions
-#TODO: Find a way to have the specific ask from the user refer to the correct instructions without having different separate txt files to avoid absolute file paths and OS limits
+
 print("Opens GPT instructions")
-# with open('C:\\Users\\suhai\\Documents\\AI-assistant\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
-    # directions = file.read()
+with open('C:\\Users\\suhai\\Documents\\AI-assistant\\ai-assistant\\assistant\\chatgpt.directions.txt', 'r') as file:
+    directions = file.read()
 with open("./assistant/gptinstructions.txt", "r") as file:
     directions = file.read()
 
@@ -77,7 +77,7 @@ class Assistant:
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
                     {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    # {"type": "function", "function": Functions.get_instagram_user_info_JSON},
+                    {"type": "function", "function": Functions.get_instagram_user_info_JSON},
                     {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
                     ]
             )
@@ -96,7 +96,7 @@ class Assistant:
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
                     {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    # {"type": "function", "function": Functions.get_instagram_user_info_JSON},
+                    {"type": "function", "function": Functions.get_instagram_user_info_JSON},
                     {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
                     ]
             )
@@ -155,7 +155,7 @@ class Assistant:
 if __name__ == '__main__':
 
     AI = Assistant()
-    # AI.send_message("return instagram user information from instagram account suhaibsadak1")
+    AI.send_message("return instagram user information from instagram account suhaibsadak1")
     AI.send_message("return weekly stock info for IBM")
     print(AI.wait_on_run())
 
