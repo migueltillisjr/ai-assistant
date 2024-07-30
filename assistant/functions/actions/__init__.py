@@ -10,8 +10,26 @@ import string
 import random
 import requests
 
-class ActionFunctions:
-    
+openai.api_key = os.getenv('OPENAI_API_KEY')
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
+ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
+fqdn = "randomfqdn.infopioneer.dev"
+
+
+def chatgpt_completions_example(phrase):
+    # Send the phrase to ChatGPT to get a more straightforward date expression
+    response = completion = client.chat.completions.create(
+      #model="gpt-3.5-turbo",
+      model="gpt-4",
+      messages=[
+          {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
+          {"role": "user", "content": f"Extract and clarify the date and convert the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
+      ]
+    )
+    return response.choices[0].message.content.strip()
+
+
+class Functions:
     def get_random_digit():
         return random.randint(0,9)
 
@@ -65,12 +83,34 @@ class ActionFunctions:
             user_info = response.json()
             return user_info 
 
+    
+
     get_instagram_user_info_JSON = {
         "name": "get_instagram_user_info",
         "description": "Get user information of prompted instagram user",
         "parameters": {
             "type": "object",
             "properties": {},
+        }
+    }
+    
+    def get_weekly_stock_info(equity: str):
+        access_token = ALPHAVANTAGE_KEY
+        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol={equity}&apikey={access_token}'
+        response = requests.get(url)
+        if response.raise_for_status() == None:
+            market_data = response.json()
+            return market_data["Weekly Time Series"]
+        
+    get_weekly_stock_info_JSON = {
+        "name":"get_weekly_stock_info",
+        "description":"Gets weekly stock info requested from the user",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "equity": {"type": "string", "description":"Name of equity to track"}
+            },
+            "required":["equity"]
         }
     }
 
@@ -90,3 +130,9 @@ class ActionFunctions:
         "parameters": {
         }
     }
+
+
+
+
+if __name__ == '__main__':
+    print(chatgpt_completions_example("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))
