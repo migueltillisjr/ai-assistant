@@ -9,7 +9,7 @@ from collections import Counter
 import string 
 import csv 
 import requests 
-
+import sqlite3
 
 git_stopwords_list = requests.get("https://gist.githubusercontent.com/rg089/35e00abf8941d72d419224cfd5b5925d/raw/12d899b70156fd0041fa9778d657330b024b959c/stopwords.txt").content
 git_stopwords = set(git_stopwords_list.decode().splitlines()) 
@@ -116,6 +116,45 @@ def metadata_to_csv(posts, keywords, post_filename = "posts.csv", keywords_filen
         for word, amount in keywords:
             writer.writerow({"Keyword": word, "Count": amount})
 
+def metadata_to_sql(posts, keywords, database="metadata.db"):
+
+    sql = sqlite3.connect(database)
+    cursor = sql.cursor()
+    try:
+        with sql:
+            cursor.execute("""CREATE TABLE IF NOT EXISTS posts(
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                title TEXT,
+                                text TEXT,
+                                karma INTEGER,
+                                author TEXT,
+                                time_posted REAL
+                            )
+                        
+                        """)
+            
+            cursor.execute("""CREATE TABLE IF NOT EXISTS keywords (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                keyword TEXT,
+                                count INTEGER
+                            )
+                        """)
+            for post in posts:
+                cursor.execute("""
+                            INSERT INTO posts (title, text, karma, author, time_posted) 
+                            VALUES (?, ?, ?, ?, ?)
+                            """, (post["Title"], post["Text"], post["Karma"], post["Author"], post["Time posted"]))
+                
+            for word, amount in keywords:
+                cursor.execute('''
+                INSERT INTO keywords (keyword, count) VALUES ( ?, ?)
+                ''', (word, amount))
+                
+    finally:
+        sql.close()       
+    
+
+    
     
 
 if __name__ == "__main__":
@@ -134,5 +173,7 @@ if __name__ == "__main__":
         for word, amount in keywords:
             print(f"{word}: {amount}")
 
-    metadata_to_csv(posts, keywords)
+    metadata_to_sql(posts, keywords)
+
+#    metadata_to_csv(posts, keywords)
     
