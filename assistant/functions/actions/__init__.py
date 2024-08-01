@@ -29,7 +29,7 @@ def chatgpt_completions_example(phrase):
     return response.choices[0].message.content.strip()
 
 
-class Functions:
+class ActionFunctions:
     def get_random_digit():
         return random.randint(0,9)
 
