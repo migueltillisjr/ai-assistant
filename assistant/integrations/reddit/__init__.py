@@ -36,121 +36,136 @@ def get_reddit_instance(client_id, client_secret, user_agent):
                        client_secret=client_secret,
                        user_agent=user_agent)
 
-def get_user_info(reddit, username):
-    try:
-        user = reddit.redditor(username)
-        user_info = {
-            "name": user.name,
-            "comment_karma": user.comment_karma,
-            "link_karma": user.link_karma,
-            "is_mod": user.is_mod,
-            "is_gold": user.is_gold,
-            "created_utc": user.created_utc
-        }
-        return user_info
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-    
+reddit = get_reddit_instance(CLIENT_ID, CLIENT_SECRET, USER_AGENT)
 
 
-def get_subreddit_info(reddit, subreddit_name):
-    try: 
-    
-        subreddit = reddit.subreddit(subreddit_name)
-
-        hot_posts = subreddit.top(time_filter="week", limit=500)
-
-        post_info = []
-
-        for post in hot_posts:
-            post_info.append({
-
-                # metadata
-
-                "Title": post.title,
-                "Text": post.selftext,
-                "Karma": post.score,
-                "Author": str(post.author),
-                "Time posted": post.created_utc
-
-            })
-        return post_info
-    except Exception as e:
-        print(f"An error occured: {e}")
-        return None
-      
-def get_keywords(posts):
-    words = []
-    nltk_stopwords = set(stopwords.words('english'))
-    for post in posts:
-        text = post["Title"] + " " + post["Text"]
-        text = text.lower()
-        text = text.translate(str.maketrans('', '', string.punctuation))
-        tokenized_words = word_tokenize(text)
-        filtered_words = [word for word in tokenized_words if word.isalpha() and word not in nltk_stopwords and word not in git_stopwords and word not in wallstreetbets_stopwords] 
-
-        words.extend(filtered_words)
-    word_counts = Counter(words)
-    popular_words = word_counts.most_common(20)
-    return popular_words
+class Reddit:
+    def __init__(self, subreddit_name) -> None:
+        self.subreddit_name = subreddit_name
+        self.posts = self.get_subreddit_info()
+        self.sub_reddit_info = self.posts
 
 
-def metadata_to_csv(posts, keywords, post_filename = f"{current_directory}/posts.csv", keywords_filename = f"{current_directory}/keywords.csv"):
-    
-    csv.register_dialect('custom', delimiter='`', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    
-    # csv for post information
-    with open(post_filename, 'w', newline='', encoding='utf-8') as file:
-        fieldnames = ["Title", "Text", "Karma", "Author", "Time posted"]
-        writer = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
-        writer.writeheader()
-        for post in posts:
-            writer.writerow(post)
+    def get_user_info(self, username):
+        try:
+            user = reddit.redditor(username)
+            user_info = {
+                "name": user.name,
+                "comment_karma": user.comment_karma,
+                "link_karma": user.link_karma,
+                "is_mod": user.is_mod,
+                "is_gold": user.is_gold,
+                "created_utc": user.created_utc
+            }
+            return user_info
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
+        
 
-    # csv for important keywords and count
-    with open(keywords_filename, 'w', newline='', encoding='utf-8') as file:
-        fieldnames = ["Keyword", "Count"]
-        writer = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
-        writer.writeheader()
-        for word, amount in keywords:
-            writer.writerow({"Keyword": word, "Count": amount})
 
-def metadata_to_sql(posts, keywords, database=f"{current_directory}/metadata.db"):
+    def get_subreddit_info(self, ):
+        try: 
+        
+            subreddit = reddit.subreddit(self.subreddit_name)
 
-    sql = sqlite3.connect(database)
-    cursor = sql.cursor()
-    try:
-        with sql:
-            cursor.execute("""CREATE TABLE IF NOT EXISTS posts(
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                title TEXT,
-                                text TEXT,
-                                karma INTEGER,
-                                author TEXT,
-                                time_posted REAL
-                            )
-                        
-                        """)
-            
-            cursor.execute("""CREATE TABLE IF NOT EXISTS keywords (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                keyword TEXT,
-                                count INTEGER
-                            )
-                        """)
-            for post in posts:
-                cursor.execute("""
-                            INSERT INTO posts (title, text, karma, author, time_posted) 
-                            VALUES (?, ?, ?, ?, ?)
-                            """, (post["Title"], post["Text"], post["Karma"], post["Author"], post["Time posted"]))
+            hot_posts = subreddit.top(time_filter="week", limit=500)
+
+            post_info = []
+
+            for post in hot_posts:
+                post_info.append({
+
+                    # metadata
+
+                    "Title": post.title,
+                    "Text": post.selftext,
+                    "Karma": post.score,
+                    "Author": str(post.author),
+                    "Time posted": post.created_utc
+
+                })
+            return post_info
+        except Exception as e:
+            print(f"An error occured: {e}")
+            return None
+        
+    def get_keywords(self, ):
+        words = []
+        nltk_stopwords = set(stopwords.words('english'))
+        for post in self.posts:
+            text = post["Title"] + " " + post["Text"]
+            text = text.lower()
+            text = text.translate(str.maketrans('', '', string.punctuation))
+            tokenized_words = word_tokenize(text)
+            filtered_words = [word for word in tokenized_words if word.isalpha() and word not in nltk_stopwords and word not in git_stopwords and word not in wallstreetbets_stopwords] 
+
+            words.extend(filtered_words)
+        word_counts = Counter(words)
+        popular_words = word_counts.most_common(20)
+
+        print("Popular keywords:")
+        for word, amount in popular_words:
+            print(f"{word}: {amount}")
+        return popular_words  
+
+
+
+
+    def metadata_to_csv(self, post_filename = f"{current_directory}/self.posts.csv", keywords_filename = f"{current_directory}/keywords.csv"):
+
+        csv.register_dialect('custom', delimiter='`', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        
+        # csv for post information
+        with open(post_filename, 'w', newline='', encoding='utf-8') as file:
+            fieldnames = ["Title", "Text", "Karma", "Author", "Time posted"]
+            writer = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
+            writer.writeheader()
+            for post in self.posts:
+                writer.writerow(post)
+
+        # csv for important keywords and count
+        with open(keywords_filename, 'w', newline='', encoding='utf-8') as file:
+            fieldnames = ["Keyword", "Count"]
+            writer = csv.DictWriter(file, fieldnames=fieldnames, dialect='excel')
+            writer.writeheader()
+            for word, amount in self.get_keywords(self.posts):
+                writer.writerow({"Keyword": word, "Count": amount})
+
+    def metadata_to_sql(self, database=f"{current_directory}/metadata.db"):
+        sql = sqlite3.connect(database)
+        cursor = sql.cursor()
+        try:
+            with sql:
+                cursor.execute("""CREATE TABLE IF NOT EXISTS self.posts(
+                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    title TEXT,
+                                    text TEXT,
+                                    karma INTEGER,
+                                    author TEXT,
+                                    time_posted REAL
+                                )
+                            
+                            """)
                 
-            for word, amount in keywords:
-                cursor.execute('''
-                INSERT INTO keywords (keyword, count) VALUES ( ?, ?)
-                ''', (word, amount))
-                
-    finally:
-        sql.close()       
+                cursor.execute("""CREATE TABLE IF NOT EXISTS keywords (
+                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    keyword TEXT,
+                                    count INTEGER
+                                )
+                            """)
+                for post in self.posts:
+                    cursor.execute("""
+                                INSERT INTO self.posts (title, text, karma, author, time_posted) 
+                                VALUES (?, ?, ?, ?, ?)
+                                """, (post["Title"], post["Text"], post["Karma"], post["Author"], post["Time posted"]))
+                    
+                for word, amount in self.get_keywords(self.posts):
+                    cursor.execute('''
+                    INSERT INTO keywords (keyword, count) VALUES ( ?, ?)
+                    ''', (word, amount))
+                    
+        finally:
+            sql.close()       
 
-    
+

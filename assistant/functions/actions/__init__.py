@@ -10,6 +10,7 @@ import string
 import random
 import requests
 from ...integrations.alpha_advantage import get_weekly_stock_info as weekly_stock_info
+from ...integrations.reddit import Reddit
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
@@ -111,8 +112,20 @@ class ActionFunctions:
         }
     }
 
+    def get_subreddit_info(subreddit_name: str):
+        return Reddit(subreddit_name).sub_reddit_info
 
-
+    get_subreddit_info_JSON = {
+        "name":"get_subreddit_info",
+        "description":"Gets subreddit info for a particular subreddit.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "subreddit_name": {"type": "string", "description":"Name of subreddit"}
+            },
+            "required":["subreddit_name"]
+        }
+    }
 
     def show_help():
         __help = [

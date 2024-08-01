@@ -24,7 +24,7 @@ import os
 import time
 import openai
 from .functions import Functions
-from .integrations.reddit import get_reddit_instance, get_subreddit_info, get_user_info, get_keywords
+from .integrations.reddit import Reddit
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -44,6 +44,15 @@ def show_json(obj):
     """Formats JSON for more readable output."""
     return json.dumps(json.loads(obj.model_dump_json()), indent=2)
 
+tools = [
+            {"type": "code_interpreter"},
+            {"type": "function", "function": Functions.get_random_digit_JSON},
+            {"type": "function", "function": Functions.get_random_letters_JSON},
+            {"type": "function", "function": Functions.get_random_emoji_JSON},
+            {"type": "function", "function": Functions.get_weekly_stock_info_JSON},
+            {"type": "function", "function": Functions.get_subreddit_info_JSON}
+            ]
+
 class Assistant:
     def __init__(self, assistant_id=None):
         while openai.api_key is None:
@@ -52,6 +61,7 @@ class Assistant:
         self.ASSISTANT_ID = assistant_id
         self.build_assistant()
         self.create_AI_thread()
+
 
 
     def create_AI_thread(self):
@@ -70,13 +80,7 @@ class Assistant:
                 name="Ai Assistant",
                 instructions=directions + "\n format all responses in json only",
                 model="gpt-4",
-                tools=[
-                    {"type": "code_interpreter"},
-                    {"type": "function", "function": Functions.get_random_digit_JSON},
-                    {"type": "function", "function": Functions.get_random_letters_JSON},
-                    {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
-                      ]
+                tools=tools
             )
             # Store the new assistant.id in .env
             self.ASSISTANT_ID = assistant.id
@@ -88,13 +92,7 @@ class Assistant:
                 name="Ai Assistant",
                 instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
                 model="gpt-4",
-                tools=[
-                    {"type": "code_interpreter"},
-                    {"type": "function", "function": Functions.get_random_digit_JSON},
-                    {"type": "function", "function": Functions.get_random_letters_JSON},
-                    {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
-                    ]
+                tools=tools
             )
             print("ASSITANT ID:")
             print(self.ASSISTANT_ID)
