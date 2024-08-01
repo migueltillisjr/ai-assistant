@@ -1,5 +1,6 @@
 import os
 import requests
+from ...config import *
 
 ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
 

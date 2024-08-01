@@ -4,9 +4,20 @@ ai-assistant
 
 ## High Level Requirements
 - python3.11
-- export OPENAI_API_KEY="YOUR OPEN AI API KEY"
-- export INSTAGRAM_ACCESS_TOKEN="YOUR INSTAGRAM ACCESS TOKEN"
-- export GPT_DIRECTIONS="Location of GPT directions on disk" -> point to assistant/files/chatgpt.directions.txt
+- Add add your assistant config file to ~/.assistant/config.yaml
+```yaml
+openai:
+  api_key: ${OPENAI_API_KEY}
+instagram:
+  access_token: ${INSTAGRAM_ACCESS_TOKEN}
+reddit:
+  id: ${CLIENT_ID}
+  secret: ${CLIENT_SECRET}
+  user_agent: ${USER_AGENT}
+alphavantage:
+  key: ${ALPHAVANTAGE_KEY}
+gpt_directions: ${GPT_DIRECTIONS}
+```
 - pip3.11 install -r requirements.txt
 
 ## Run it at the Cli

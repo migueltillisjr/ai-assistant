@@ -25,6 +25,7 @@ import time
 import openai
 from .functions import Functions
 from .integrations.reddit import Reddit
+from assistant.config import *
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
