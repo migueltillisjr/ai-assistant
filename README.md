@@ -14,6 +14,7 @@ ai-assistant
 # Assistant
 python3.11 -m assistant
 python3.11 -m assistant.integrations.reddit
+python3.11 -m assistant.integrations.alpha_advantage
 
 # UI, login info location -> ui/.streamlit/secrets.toml
 cd assistant/ui/

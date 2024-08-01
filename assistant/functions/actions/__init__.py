@@ -9,6 +9,7 @@ from functools import wraps
 import string
 import random
 import requests
+from ...integrations.alpha_advantage import get_weekly_stock_info as weekly_stock_info
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
@@ -95,12 +96,8 @@ class ActionFunctions:
     }
     
     def get_weekly_stock_info(equity: str):
-        access_token = ALPHAVANTAGE_KEY
-        url = f'https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol={equity}&apikey={access_token}'
-        response = requests.get(url)
-        if response.raise_for_status() == None:
-            market_data = response.json()
-            return market_data["Weekly Time Series"]
+        return weekly_stock_info(equity)
+        
         
     get_weekly_stock_info_JSON = {
         "name":"get_weekly_stock_info",
@@ -130,9 +127,3 @@ class ActionFunctions:
         "parameters": {
         }
     }
-
-
-
-
-if __name__ == '__main__':
-    print(chatgpt_completions_example("schedule a campaign with the subject test subject, the sender name miguel, schedule the campaign today"))

@@ -75,7 +75,7 @@ class Assistant:
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
                     {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    {"type": "function", "function": Functions.get_instagram_user_info_JSON}
+                    {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
                       ]
             )
             # Store the new assistant.id in .env
@@ -93,7 +93,7 @@ class Assistant:
                     {"type": "function", "function": Functions.get_random_digit_JSON},
                     {"type": "function", "function": Functions.get_random_letters_JSON},
                     {"type": "function", "function": Functions.get_random_emoji_JSON},
-                    {"type": "function", "function": Functions.get_instagram_user_info_JSON}
+                    {"type": "function", "function": Functions.get_weekly_stock_info_JSON}
                     ]
             )
             print("ASSITANT ID:")
@@ -118,6 +118,10 @@ class Assistant:
                 tool_outputs.append({"tool_call_id": tool_call_id, "output": json.dumps(output)})
                 print(f'\n\tReturning {output}')
             self.run = self.client.beta.threads.runs.submit_tool_outputs(thread_id=self.thread.id, run_id=self.run.id, tool_outputs=tool_outputs)
+            with open(LOGFILE, 'a+') as f:
+                f.write('\n**Assistant**:\n')
+                f.write(json.dumps(output))
+                f.write('\n\n---\n')
             return output
         else:
             # Get messages added after our last user message
