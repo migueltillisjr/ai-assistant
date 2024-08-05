@@ -51,8 +51,11 @@ tools = [
             {"type": "function", "function": Functions.get_random_letters_JSON},
             {"type": "function", "function": Functions.get_random_emoji_JSON},
             {"type": "function", "function": Functions.get_weekly_stock_info_JSON},
-            {"type": "function", "function": Functions.get_subreddit_info_JSON}
+            {"type": "function", "function": Functions.get_subreddit_info_JSON},
+            {"type": "function", "function": Functions.get_weekly_stock_knowledge_JSON},
             ]
+
+
 
 class Assistant:
     def __init__(self, assistant_id=None):
@@ -62,7 +65,6 @@ class Assistant:
         self.ASSISTANT_ID = assistant_id
         self.build_assistant()
         self.create_AI_thread()
-
 
 
     def create_AI_thread(self):
@@ -149,4 +151,5 @@ class Assistant:
         self.run = self.client.beta.threads.runs.create(thread_id=self.thread.id, assistant_id=self.ASSISTANT_ID)
         with open(LOGFILE, 'a+') as f:
             f.write(f'**User:** `{message_text}`\n')
+
 

@@ -1,7 +1,10 @@
 import os
 import requests
 from ...config import *
+from ...openai_custom import completions
+# from ....error_handler import error_handler
 
+INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
 
 def get_weekly_stock_info(equity: str):
@@ -12,3 +15,9 @@ def get_weekly_stock_info(equity: str):
         market_data = response.json()
         return market_data["Weekly Time Series"]
 
+
+# @error_handler
+def get_weekly_stock_insights(phrase: str, equity: str):
+    stock_info = get_weekly_stock_info(equity)
+    print(f"{phrase}: {stock_info}")
+    return completions(phrase=f"{phrase}: {stock_info}")

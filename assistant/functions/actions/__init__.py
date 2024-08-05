@@ -10,25 +10,14 @@ import string
 import random
 import requests
 from ...integrations.alpha_advantage import get_weekly_stock_info as weekly_stock_info
+from ...integrations.alpha_advantage import get_weekly_stock_insights
 from ...integrations.reddit import Reddit
+from ...openai_custom import completions
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 ALPHAVANTAGE_KEY = os.getenv('ALPHAVANTAGE_KEY')
 fqdn = "randomfqdn.infopioneer.dev"
-
-
-def chatgpt_completions_example(phrase):
-    # Send the phrase to ChatGPT to get a more straightforward date expression
-    response = completion = client.chat.completions.create(
-      #model="gpt-3.5-turbo",
-      model="gpt-4",
-      messages=[
-          {"role": "system", "content": "You are a helpful assistant that does only what I ask and exactly as I ask."},
-          {"role": "user", "content": f"Extract and clarify the date and convert the date to the format YYYYMMDD from this phrase return only the converted date in relation to today, the current date {current_date()}. Also only return the numbers of the formatted date and nothing else all of the time. Provide no explanation: '{phrase}'"}
-      ]
-    )
-    return response.choices[0].message.content.strip()
 
 
 class ActionFunctions:
@@ -112,6 +101,22 @@ class ActionFunctions:
         }
     }
 
+    def get_weekly_stock_knowledge(phrase: str, equity: str):
+        return get_weekly_stock_insights(phrase=phrase, equity=equity) 
+        
+    get_weekly_stock_knowledge_JSON = {
+        "name":"get_weekly_stock_knowledge",
+        "description":"Gets weekly stock insights requested by the user. Such as give me a summary of a stock. Or insights of a stock.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "phrase": {"type": "string", "description": "The phrase that initiated this request that represents what is being asked for."},
+                "equity": {"type": "string", "description":"Name of equity to describe and get instights from."}
+            },
+            "required":["phrase","equity"]
+        }
+    }
+
     def get_subreddit_info(subreddit_name: str):
         return Reddit(subreddit_name).sub_reddit_info
 
@@ -124,6 +129,22 @@ class ActionFunctions:
                 "subreddit_name": {"type": "string", "description":"Name of subreddit"}
             },
             "required":["subreddit_name"]
+        }
+    }
+
+    def catch_all(phrase):
+        resp = completions(phrase=phrase)
+        return resp
+
+    catch_all_JSON = {
+        "name": "catch_all",
+        "description": "This function is to be used for general requests that don't match a particular defined function.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "phrase": {"type": "string", "description": "The phrase that initiated this request that represents what is being asked for."},
+            },
+        "required":["phrase"],
         }
     }
 
