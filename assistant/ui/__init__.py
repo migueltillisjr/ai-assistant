@@ -16,8 +16,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def auth():
     st.session_state.sidebar_state='collapsed'
-    st.set_page_config(initial_sidebar_state=st.se
-                       
+    st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
+    global authenticator, config
     # Load configuration for authentication
     with open(f'/home/miguel/freedom/ai-assistant/ui/config.yaml') as file:
         config = yaml.load(file, Loader=SafeLoader)
@@ -35,7 +35,7 @@ def auth():
 
 def sign_up():
     # Initialize the modal
-    model = Modal("Register", key="signup-modal")
+    modal = Modal("Register", key="signup-modal")
 
     # Button to open the modal
     open_modal = st.button("Sign Up")
