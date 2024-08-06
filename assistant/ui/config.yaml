@@ -1,0 +1,23 @@
+cookie:
+  expiry_days: 30
+  key: your_cookie_key
+  name: your_cookie_name
+credentials:
+  usernames:
+    your_email@example.com:
+      email: your_email@example.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: your_email@example.com
+      password: $2b$12$veorkNKlB8FxbFpKxLOuiOgAj26rG1uzTrOyqfJ2yThUaRmjMuzdK
+      subscription: premium
+    your_username:
+      email: your_email@example.com
+      failed_login_attempts: 0
+      logged_in: false
+      password: $2b$12$buqABkAB5ZqCAq.Guf91Y..ffNjkFZRoxgoookA9YLimmPvCidRBe
+      pw: your_password_hash
+preauthorized:
+  emails:
+  - preauthorized_user1@example.com
+  - preauthorized_user2@example.com

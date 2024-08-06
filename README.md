@@ -17,7 +17,29 @@ reddit:
 alphavantage:
   key: ${ALPHAVANTAGE_KEY}
 gpt_directions: ${GPT_DIRECTIONS}
+ui_auth: ${UI_AUTH}
 ```
+
+## Example Ui Authentication file
+```yaml
+credentials:
+  usernames:
+    your_username:
+      email: your_email@example.com
+      password: your_password_hash
+
+cookie:
+  name: your_cookie_name
+  key: your_cookie_key
+  expiry_days: 30
+
+preauthorized:
+  emails:
+    - preauthorized_user1@example.com
+    - preauthorized_user2@example.com
+```
+
+
 - pip3.11 install -r requirements.txt
 
 ## Run it at the Cli

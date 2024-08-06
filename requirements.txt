@@ -21,3 +21,5 @@ praw
 streamlit-authenticator
 nltk
 pyyaml
+passlib
+streamlit_modal
