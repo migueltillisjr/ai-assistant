@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-#import stripe
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
@@ -10,6 +9,7 @@ from streamlit_option_menu import option_menu
 import pandas as pd
 from io import StringIO
 import sys
+
 current_script_directory = os.path.abspath(os.path.dirname(__file__))
 two_levels_up = os.path.dirname(os.path.dirname(current_script_directory))
 sys.path.append(two_levels_up)
@@ -18,19 +18,16 @@ from assistant.config import *
 
 FINE_TUNING = os.getenv('FINE_TUNING')
 
-# Set up Stripe
+# Set up Stripe (if needed)
+# import stripe
 # stripe.api_key = 'your_stripe_secret_key'
 
 def load_config():
-    # Expand the user path and read the YAML file
     config_path = os.path.expanduser('~/.assistant/config.yaml')
-    
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found at {config_path}")
-
     with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
-
     return config
 
 def get_ui_auth():
@@ -46,15 +43,10 @@ UI_AUTH_FILE = get_ui_auth()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def auth():
-    global authenticator, config
+    global authenticator, config, authentication_status
     
-    # st.session_state.sidebar_state='expanded'
-    # st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
-
-    # Load configuration for authentication
     with open(UI_AUTH_FILE) as file:
         config = yaml.load(file, Loader=SafeLoader)
-        st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
 
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -64,30 +56,24 @@ def auth():
         config['preauthorized']
     )
 
-    global name, authentication_status, username
+    global name, username
     name, authentication_status, username = authenticator.login('main', 'main')
-
+    
+    # Display the image only if not authenticated
+    if authentication_status is None:
+        st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
 
 def sign_up():
-    # Initialize the modal
     modal = Modal("Register", key="signup-modal")
-
-    # Button to open the modal
     open_modal = st.button("Sign Up")
-
     if open_modal:
         modal.open()
-
-    # Define the modal content
     if modal.is_open():
         with modal.container():
-            # Sign-up page
-            # st.title('Register')
             new_user_email = st.text_input('Email')
             new_user_username = st.text_input('Username')
             new_user_password = st.text_input('Password', type='password')
             new_user_subscription = st.selectbox('Subscription Type', ['basic', 'premium'])
-
             if st.button('Register'):
                 if new_user_username in config['credentials']['usernames']:
                     st.error('Username already exists')
@@ -103,7 +89,6 @@ def sign_up():
                         yaml.dump(config, file)
                     st.success('User registered successfully!')
 
-
 def save_uploaded_file(uploaded_file, save_path):
     try:
         with open(save_path, "wb") as f:
@@ -112,7 +97,6 @@ def save_uploaded_file(uploaded_file, save_path):
     except Exception as e:
         st.error(f"Error saving file: {e}")
         return False
-
 
 def auth_success():
     with st.sidebar:
@@ -126,22 +110,18 @@ def auth_success():
         )
         authenticator.logout('Logout', 'main')
 
-    if selected_option =="Home":
+    if selected_option == "Home":
         st.title("Home Page")
         uploaded_files = st.file_uploader("Upload files", type=("csv", "pdf"), accept_multiple_files=True)
         prompt = st.text_input(
             "Ask something about your data",
-            placeholder="Can  you give me a short summary?",
+            placeholder="Can you give me a short summary?",
             disabled=not uploaded_files,
         )
         if uploaded_files:
-            # Read the CSV file into a DataFrame
-
             for uploaded_file in uploaded_files:
-                print(dir(uploaded_file))
                 if '.csv' in uploaded_file.name:
                     df = pd.read_csv(uploaded_file)
-                    #Display the DataFrame
                     st.write(uploaded_file.name)
                     st.write(df)
                     save_path = FINE_TUNING + '/original/' + uploaded_file.name
@@ -155,22 +135,17 @@ def auth_success():
                 AI.send_message(prompt)
                 response = AI.wait_on_run()
                 response = response.strip("[]'")
-                # df = pd.read_json()
                 st.write(response)
             st.success("Processing completed successfully!")
-
-
 
     elif selected_option == "Profile":
         st.title("Profile Page")
         st.title("Account Details")
         st.write(f"Welcome *{name}*")
 
-        # Collect user information
         email = st.text_input('Email', value=config['credentials']['usernames'][username]['email'])
         amount = st.number_input('Amount', min_value=0.0, step=0.01)
 
-        # User detail update pane
         st.subheader('Update User Details')
         new_email = st.text_input('New Email', value=email)
         new_username = st.text_input('New Username', value=username)
@@ -190,22 +165,7 @@ def auth_success():
             config['credentials']['usernames'][username]['subscription'] = subscription_type
             with open(UI_AUTH_FILE, 'w') as file:
                 yaml.dump(config, file)
-
-            # # Add code to update suscription
-            # try:
-            #     customer = stripe.Customer.create(email=email)
-
-            #     # create a payment intent
-            #     payment_intent = stripe.PaymentIntent.create(
-            #         amount=int(amount * 100), # Amouhnt in cents
-            #         currency='usd',
-            #         customer=customer.id,
-            #         description='SaaS subscription',
-            #     )
-            # except Exception as e:
-            #     st.error(f'Error: {e}')
             st.success('Details updated successfully')
-
 
 def main():
     auth()
