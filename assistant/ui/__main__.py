@@ -14,7 +14,9 @@ current_script_directory = os.path.abspath(os.path.dirname(__file__))
 two_levels_up = os.path.dirname(os.path.dirname(current_script_directory))
 sys.path.append(two_levels_up)
 from assistant import Assistant
+from assistant.config import *
 
+FINE_TUNING = os.getenv('FINE_TUNING')
 
 # Set up Stripe
 # stripe.api_key = 'your_stripe_secret_key'
@@ -98,24 +100,15 @@ def sign_up():
                     st.success('User registered successfully!')
 
 
-def upload_files():
-    st.title("File Q&A with OpenAi")
-    uploaded_files = st.file_uploader("Upload an article", type=("csv", "pdf"), accept_multiple_files=True)
-    question = st.text_input(
-        "Ask something about the article",
-        placeholder="Can  you give me a short summary?",
-        disabled=not uploaded_files,
-    )
+def save_uploaded_file(uploaded_file, save_path):
+    try:
+        with open(save_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        return True
+    except Exception as e:
+        st.error(f"Error saving file: {e}")
+        return False
 
-    if uploaded_files:
-        # Iterate over the list of uploaded files and process them
-        for uploaded_file in uploaded_files:
-            #upload to assistant
-            pass
-    if uploaded_files and question:
-        # make query to assistant & write response to view
-        #st.write(message)
-        pass
 
 def auth_success():
     with st.sidebar:
@@ -131,18 +124,35 @@ def auth_success():
         st.title("Home Page")
         uploaded_files = st.file_uploader("Upload files", type=("csv", "pdf"), accept_multiple_files=True)
         prompt = st.text_input(
-            "Ask something about the article",
+            "Ask something about your data",
             placeholder="Can  you give me a short summary?",
             disabled=not uploaded_files,
         )
         if uploaded_files:
             # Read the CSV file into a DataFrame
-            # df = pd.read_csv(uploaded_file)
-            # Display the DataFrame
-            # st.write(df)
-            pass
+
+            for uploaded_file in uploaded_files:
+                print(dir(uploaded_file))
+                if '.csv' in uploaded_file.name:
+                    df = pd.read_csv(uploaded_file)
+                    #Display the DataFrame
+                    st.write(uploaded_file.name)
+                    st.write(df)
+                    save_path = FINE_TUNING + '/original/' + uploaded_file.name
+                    save_uploaded_file(uploaded_file=uploaded_file, save_path=save_path)
+                if '.pdf' in uploaded_file.name:
+                    save_path = FINE_TUNING + '/original/' + uploaded_file.name
+                    save_uploaded_file(uploaded_file=uploaded_file, save_path=save_path)
         if uploaded_files and prompt:
-            pass
+            with st.spinner("Processing..."):
+                AI = Assistant()
+                AI.send_message(prompt)
+                response = AI.wait_on_run()
+                response = response.strip("[]'")
+                # df = pd.read_json()
+                st.write(response)
+            st.success("Processing completed successfully!")
+
 
 
     elif selected_option == "Profile":

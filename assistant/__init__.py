@@ -33,10 +33,11 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 GPT_DIRECTIONS = os.getenv('GPT_DIRECTIONS')
 FINE_TUNING = os.getenv('FINE_TUNING')
+LOGFILE = os.getenv('LOG_FILE')
 
 openai.api_key = OPENAI_API_KEY
 
-LOGFILE = 'assistant/files/AssistantLog.md'  # We'll store all interactions in this file
+# LOGFILE = 'assistant/files/AssistantLog.md'  # We'll store all interactions in this file
 
 # opens the GPT's instructions
 print("Opens GPT instructions")
