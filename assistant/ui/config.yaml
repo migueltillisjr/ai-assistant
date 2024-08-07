@@ -21,3 +21,4 @@ preauthorized:
   emails:
   - preauthorized_user1@example.com
   - preauthorized_user2@example.com
+image_dir: /home/miguel/freedom/ai-assistant/assistant/ui/images

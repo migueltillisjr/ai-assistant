@@ -46,12 +46,15 @@ UI_AUTH_FILE = get_ui_auth()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def auth():
-    st.session_state.sidebar_state='collapsed'
-    st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
     global authenticator, config
+    
+    # st.session_state.sidebar_state='expanded'
+    # st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
+
     # Load configuration for authentication
     with open(UI_AUTH_FILE) as file:
         config = yaml.load(file, Loader=SafeLoader)
+        st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
 
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -63,6 +66,7 @@ def auth():
 
     global name, authentication_status, username
     name, authentication_status, username = authenticator.login('main', 'main')
+
 
 def sign_up():
     # Initialize the modal
@@ -112,6 +116,7 @@ def save_uploaded_file(uploaded_file, save_path):
 
 def auth_success():
     with st.sidebar:
+        st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
         selected_option = option_menu(
             "Main Menu",
             ["Home", "Profile"],
@@ -120,6 +125,7 @@ def auth_success():
             default_index=0,
         )
         authenticator.logout('Logout', 'main')
+
     if selected_option =="Home":
         st.title("Home Page")
         uploaded_files = st.file_uploader("Upload files", type=("csv", "pdf"), accept_multiple_files=True)
