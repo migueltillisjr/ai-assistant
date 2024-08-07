@@ -9,12 +9,15 @@ from streamlit_option_menu import option_menu
 import pandas as pd
 from io import StringIO
 import sys
+import json
 
 current_script_directory = os.path.abspath(os.path.dirname(__file__))
 two_levels_up = os.path.dirname(os.path.dirname(current_script_directory))
 sys.path.append(two_levels_up)
 from assistant import Assistant
 from assistant.config import *
+from assistant.error_handler import error_handler
+from assistant.log import logging
 
 FINE_TUNING = os.getenv('FINE_TUNING')
 
@@ -38,15 +41,17 @@ def get_ui_auth():
     return ui_auth
 
 UI_AUTH_FILE = get_ui_auth()
+config = object()
+with open(UI_AUTH_FILE) as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def auth():
     global authenticator, config, authentication_status
-    
-    with open(UI_AUTH_FILE) as file:
-        config = yaml.load(file, Loader=SafeLoader)
 
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -59,9 +64,7 @@ def auth():
     global name, username
     name, authentication_status, username = authenticator.login('main', 'main')
     
-    # Display the image only if not authenticated
-    if authentication_status is None:
-        st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
+
 
 def sign_up():
     modal = Modal("Register", key="signup-modal")
@@ -98,6 +101,7 @@ def save_uploaded_file(uploaded_file, save_path):
         st.error(f"Error saving file: {e}")
         return False
 
+@error_handler
 def auth_success():
     with st.sidebar:
         st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
@@ -116,7 +120,7 @@ def auth_success():
         prompt = st.text_input(
             "Ask something about your data",
             placeholder="Can you give me a short summary?",
-            disabled=not uploaded_files,
+            # disabled=not uploaded_files,
         )
         if uploaded_files:
             for uploaded_file in uploaded_files:
@@ -135,6 +139,8 @@ def auth_success():
                 AI.send_message(prompt)
                 response = AI.wait_on_run()
                 response = response.strip("[]'")
+                logging.info(f'*** Info {response} ***')
+                response = json.loads(str(response))
                 st.write(response)
             st.success("Processing completed successfully!")
 
@@ -168,13 +174,18 @@ def auth_success():
             st.success('Details updated successfully')
 
 def main():
+    st.image(config['image_dir'] + '/adler2.png', use_column_width=True)
     auth()
     if authentication_status:
+        st.session_state.show_image = False
         auth_success()
     elif authentication_status == False:
+        # Display the image only if not authenticated
+        st.session_state.show_image = True
         st.error('Username/password is incorrect')
         sign_up()
     elif authentication_status == None:
+        st.session_state.show_image = True
         st.warning('Please enter your username and password')
         sign_up()
 

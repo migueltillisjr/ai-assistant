@@ -139,3 +139,110 @@ Beginning thread_lklVxx1HshT8TiN9GmkCqfXv
 ```
 
 ---
+2024-08-07 08:14:34
+Beginning thread_qvu9uxH6XJdEKOyWua0uafxD
+
+**User:** `give a concise summary`
+
+**Assistant**:
+```json
+{
+  "summary": "The documents outline the budgetary expenses for various departments under San Diego's City Hall for fiscal years 2022, 2023, and 2024. Key departments such as Police, Fire-Rescue, Environmental Services, and Parks & Recreation have significant budget allocations. Overall, there is an increase in the adopted budget from 2022 to 2024 for most departments, reflecting a trend towards scaling operations and addressing emerging needs such as homelessness and sustainability."
+}
+```
+
+---
+2024-08-07 08:19:31
+Beginning thread_sfGdcMrAGDlN59ncXoD6JGFR
+
+**User:** `give me  a short summary`
+
+**Assistant**:
+```json
+{
+  "summary": "The documents contain the San Diego City Hall's Adopted Budget for the General Fund Expenditures by department for fiscal years 2022, 2023, and 2024. It outlines the actual expenditures for 2022 and the adopted budgets for 2023 and 2024 across various departments, such as Public Utilities, Purchasing & Contracting, Race & Equity, Transportation, and others. Key figures include the total general fund expenditures, which were $1,760,232,191 for 2022, with adopted budgets of $1,955,008,750 for 2023, and $2,081,833,190 for 2024."
+}
+```
+
+---
+2024-08-07 08:22:51
+Beginning thread_wPFWDhnaCI5KbM6wWqLaMj76
+
+**User:** `give concise summary`
+
+**Assistant**:
+```json
+{
+  "SanDiego_CityHall_AdoptedBudget_General_Fund_Expendatures_by_department_combined": {
+    "2022": {
+      "Total Budget": "1,760,232,191",
+      "Highest Expenditure Department": "Police",
+      "Highest Expenditure Amount": "604,200,010"
+    },
+    "2023": {
+      "Total Budget": "1,955,008,750",
+      "Highest Expenditure Department": "Police",
+      "Highest Expenditure Amount": "584,706,166"
+    },
+    "2024": {
+      "Total Budget": "2,081,833,190",
+      "Highest Expenditure Department": "Police",
+      "Highest Expenditure Amount": "622,908,762"
+    }
+  }
+}
+```
+
+---
+2024-08-07 08:23:54
+Beginning thread_zqaEYal1PPeLTqwtONBOV7fP
+
+**User:** `give concise summary`
+
+**Assistant**:
+```json
+{
+  "summary": {
+    "departments": [
+      {
+        "Department": "City Attorney",
+        "FY 2022 Actual": 69700865,
+        "FY 2023 Adopted Budget": 74905930,
+        "FY 2024 Adopted Budget": 83809234
+      },
+      {
+        "Department": "City Auditor",
+        "FY 2022 Actual": 4291491,
+        "FY 2023 Adopted Budget": 4562333,
+        "FY 2024 Adopted Budget": 5104700
+      },
+      {
+        "Department": "City Clerk",
+        "FY 2022 Actual": 5901878,
+        "FY 2023 Adopted Budget": 6951684,
+        "FY 2024 Adopted Budget": 7389266
+      },
+      {
+        "Department": "City Council",
+        "FY 2022 Actual": 15508542,
+        "FY 2023 Adopted Budget": 19671403,
+        "FY 2024 Adopted Budget": 24147773
+      },
+      {
+        "Department": "City Planning",
+        "FY 2022 Actual": 8197159,
+        "FY 2023 Adopted Budget": 9882949,
+        "FY 2024 Adopted Budget": 11574291
+      }
+    ],
+    "total_general_fund_expenditures": {
+      "FY 2022 Actual": 1760232191,
+      "FY 2023 Adopted Budget": 1955008750,
+      "FY 2024 Adopted Budget": 2081833190
+    }
+  },
+  "source": "SanDiego_CityHall_AdoptedBudget_General_Fund_Expendatures_by_department_combined - 1.csv.json"
+}
+```
+
+---
