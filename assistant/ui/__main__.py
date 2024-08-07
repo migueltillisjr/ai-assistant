@@ -115,7 +115,7 @@ def auth_success():
         authenticator.logout('Logout', 'main')
 
     if selected_option == "Home":
-        st.title("Home Page")
+        st.title("Hi, I'm Adler, a Digital Assistant.")
         uploaded_files = st.file_uploader("Upload files", type=("csv", "pdf"), accept_multiple_files=True)
         prompt = st.text_input(
             "Ask something about your data",
@@ -140,7 +140,7 @@ def auth_success():
                 response = AI.wait_on_run()
                 response = response.strip("[]'")
                 logging.info(f'*** Info {response} ***')
-                response = json.loads(str(response))
+                response = json.loads(str(response).replace('\\', '\\\\'))
                 st.write(response)
             st.success("Processing completed successfully!")
 
