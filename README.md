@@ -18,6 +18,7 @@ alphavantage:
   key: ${ALPHAVANTAGE_KEY}
 gpt_directions: ${GPT_DIRECTIONS}
 ui_auth: ${UI_AUTH}
+fine_tuning: ${FINE_TUNING}
 ```
 
 ## Example Ui Authentication file

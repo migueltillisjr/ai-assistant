@@ -8,6 +8,13 @@ from passlib.context import CryptContext
 from streamlit_modal import Modal
 from streamlit_option_menu import option_menu
 import pandas as pd
+from io import StringIO
+import sys
+current_script_directory = os.path.abspath(os.path.dirname(__file__))
+two_levels_up = os.path.dirname(os.path.dirname(current_script_directory))
+sys.path.append(two_levels_up)
+from assistant import Assistant
+
 
 # Set up Stripe
 # stripe.api_key = 'your_stripe_secret_key'
@@ -27,10 +34,8 @@ def load_config():
 def get_ui_auth():
     config = load_config()
     ui_auth = config.get('ui_auth')
-
     if ui_auth is None:
         raise KeyError("Key 'ui_auth' not found in the config file")
-
     return ui_auth
 
 UI_AUTH_FILE = get_ui_auth()
@@ -93,6 +98,25 @@ def sign_up():
                     st.success('User registered successfully!')
 
 
+def upload_files():
+    st.title("File Q&A with OpenAi")
+    uploaded_files = st.file_uploader("Upload an article", type=("csv", "pdf"), accept_multiple_files=True)
+    question = st.text_input(
+        "Ask something about the article",
+        placeholder="Can  you give me a short summary?",
+        disabled=not uploaded_files,
+    )
+
+    if uploaded_files:
+        # Iterate over the list of uploaded files and process them
+        for uploaded_file in uploaded_files:
+            #upload to assistant
+            pass
+    if uploaded_files and question:
+        # make query to assistant & write response to view
+        #st.write(message)
+        pass
+
 def auth_success():
     with st.sidebar:
         selected_option = option_menu(
@@ -105,14 +129,21 @@ def auth_success():
         authenticator.logout('Logout', 'main')
     if selected_option =="Home":
         st.title("Home Page")
-        st.write("Welcome to the Home Page!")
-        uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-        if uploaded_file is not None:
+        uploaded_files = st.file_uploader("Upload files", type=("csv", "pdf"), accept_multiple_files=True)
+        prompt = st.text_input(
+            "Ask something about the article",
+            placeholder="Can  you give me a short summary?",
+            disabled=not uploaded_files,
+        )
+        if uploaded_files:
             # Read the CSV file into a DataFrame
-            df = pd.read_csv(uploaded_file)
-
+            # df = pd.read_csv(uploaded_file)
             # Display the DataFrame
-            st.write(df)
+            # st.write(df)
+            pass
+        if uploaded_files and prompt:
+            pass
+
 
     elif selected_option == "Profile":
         st.title("Profile Page")

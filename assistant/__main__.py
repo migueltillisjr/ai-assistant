@@ -1,5 +1,6 @@
 from . import Assistant
 
+
 AI = Assistant()
 AI.send_message("return subreddit information from wallstreetbets")
 print(AI.wait_on_run())
@@ -14,4 +15,8 @@ print(AI.wait_on_run())
 
 AI = Assistant()
 AI.send_message("Give me a summary of SPY on friday")
+print(AI.wait_on_run())
+
+AI = Assistant()
+AI.send_message("Give me insights from the documents")
 print(AI.wait_on_run())

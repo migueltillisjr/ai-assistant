@@ -26,11 +26,13 @@ import openai
 from .functions import Functions
 from .integrations.reddit import Reddit
 from assistant.config import *
+import pandas as pd
 
 # Replace with your own OpenAI API key
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 INSTAGRAM_ACCESS_TOKEN = os.getenv('INSTAGRAM_ACCESS_TOKEN')
 GPT_DIRECTIONS = os.getenv('GPT_DIRECTIONS')
+FINE_TUNING = os.getenv('FINE_TUNING')
 
 openai.api_key = OPENAI_API_KEY
 
@@ -46,16 +48,15 @@ def show_json(obj):
     return json.dumps(json.loads(obj.model_dump_json()), indent=2)
 
 tools = [
-            {"type": "code_interpreter"},
-            {"type": "function", "function": Functions.get_random_digit_JSON},
-            {"type": "function", "function": Functions.get_random_letters_JSON},
-            {"type": "function", "function": Functions.get_random_emoji_JSON},
-            {"type": "function", "function": Functions.get_weekly_stock_info_JSON},
-            {"type": "function", "function": Functions.get_subreddit_info_JSON},
-            {"type": "function", "function": Functions.get_weekly_stock_knowledge_JSON},
-            ]
-
-
+    {"type": "code_interpreter"},
+    {"type": "file_search"},
+    {"type": "function", "function": Functions.get_random_digit_JSON},
+    {"type": "function", "function": Functions.get_random_letters_JSON},
+    {"type": "function", "function": Functions.get_random_emoji_JSON},
+    {"type": "function", "function": Functions.get_weekly_stock_info_JSON},
+    {"type": "function", "function": Functions.get_subreddit_info_JSON},
+    {"type": "function", "function": Functions.get_weekly_stock_knowledge_JSON},
+]
 
 class Assistant:
     def __init__(self, assistant_id=None):
@@ -65,6 +66,118 @@ class Assistant:
         self.ASSISTANT_ID = assistant_id
         self.build_assistant()
         self.create_AI_thread()
+        self.files = list()
+        self.vector_store_id = str()
+
+    def csv_to_json(self, path):
+        # Load the CSV file into a DataFrame
+        csv_file_path = f'{path}'
+        df = pd.read_csv(csv_file_path)
+
+        # Convert the DataFrame to JSON
+        json_result = df.to_json(orient='records', lines=True)
+
+        # Save the JSON to a file
+        json_file_path = f'{path}.json'
+        with open(json_file_path, 'w') as json_file:
+            json_file.write(json_result)
+
+
+    def get_absolute_paths(self, directory):
+        # List to store the absolute paths
+        absolute_paths = []
+
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            # Create the full path
+            full_path = os.path.join(directory, filename)
+            
+            # Check if it's a file (and not a directory)
+            if os.path.isfile(full_path):
+                absolute_paths.append(os.path.abspath(full_path))
+        
+        return absolute_paths
+    
+    def get_csv_file_paths(self, directory):
+        # List to store the absolute paths of CSV files
+        json_paths = []
+
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            # Create the full path
+            full_path = os.path.join(directory, filename)
+            
+            # Check if it's a file and if it has a .csv extension
+            if os.path.isfile(full_path) and filename.endswith('.csv'):
+                json_paths.append(os.path.abspath(full_path))
+        
+        return json_paths
+
+    def get_json_file_paths(self, directory):
+        # List to store the absolute paths of CSV files
+        json_paths = []
+
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            # Create the full path
+            full_path = os.path.join(directory, filename)
+            
+            # Check if it's a file and if it has a .csv extension
+            if os.path.isfile(full_path) and filename.endswith('.json'):
+                json_paths.append(os.path.abspath(full_path))
+        
+        return json_paths
+    
+    def get_pdf_file_paths(self, directory):
+        # List to store the absolute paths of CSV files
+        json_paths = []
+
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            # Create the full path
+            full_path = os.path.join(directory, filename)
+            
+            # Check if it's a file and if it has a .csv extension
+            if os.path.isfile(full_path) and filename.endswith('.pdf'):
+                json_paths.append(os.path.abspath(full_path))
+        
+        return json_paths
+
+    def delete_files(self, file_paths):
+        for file_path in file_paths:
+            if os.path.isfile(file_path):
+                try:
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+                except Exception as e:
+                    print(f"Error deleting file {file_path}: {e}")
+            else:
+                print(f"File not found: {file_path}")
+
+    def create_vector_store(self):
+        # Create a vector store caled "Financial Statements"
+        vector_store = self.client.beta.vector_stores.create(name="ai-assistant")
+        self.vector_store_id = vector_store.id
+        # Ready the files for upload to OpenAI
+        # file_paths = [f"{FINE_TUNING}"]
+        for path in self.get_csv_file_paths(FINE_TUNING + '/original'):
+            self.csv_to_json(path)
+
+        json_file_paths = self.get_json_file_paths(FINE_TUNING + '/original')
+        pdf_file_paths = self.get_pdf_file_paths(FINE_TUNING + '/original')
+        file_streams = [open(path, "rb") for path in json_file_paths]
+        file_streams = file_streams + [open(path, "rb") for path in pdf_file_paths]
+
+        # Use the upload and poll SDK helper to upload the files, add them to the vector store,
+        # and poll the status of the file batch for completion.
+        file_batch = self.client.beta.vector_stores.file_batches.upload_and_poll(
+        vector_store_id=vector_store.id, files=file_streams
+        )
+        
+        # You can print the status and the file counts of the batch to see the result of this operation.
+        print(file_batch.status)
+        print(file_batch.file_counts)
+        self.delete_files(file_paths=json_file_paths)
 
 
     def create_AI_thread(self):
@@ -74,34 +187,39 @@ class Assistant:
         print(show_json(self.thread))
 
         with open(LOGFILE, 'a+') as f:
-          f.write(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
+            f.write(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\nBeginning {self.thread.id}\n\n')
+
 
     def build_assistant(self):
+        self.create_vector_store()
         if not self.ASSISTANT_ID:  # Create the assistant
             print('Creating assistant...')
+            # file_ids = self.upload_files(f'{FINE_TUNING}/original', f'{FINE_TUNING}/jsonl')
             assistant = self.client.beta.assistants.create(
                 name="Ai Assistant",
                 instructions=directions + "\n format all responses in json only",
-                model="gpt-4",
-                tools=tools
+                model="gpt-4o",
+                tools=tools,
+                tool_resources={"file_search": {"vector_store_ids": [self.vector_store_id]}}
             )
             # Store the new assistant.id in .env
             self.ASSISTANT_ID = assistant.id
-            print("ASSITANT ID:")
+            print("ASSISTANT ID:")
             print(self.ASSISTANT_ID)
         else:
+            # file_ids = self.upload_files(f'{FINE_TUNING}/original', f'{FINE_TUNING}/jsonl')
             assistant = self.client.beta.assistants.update(
                 assistant_id=self.ASSISTANT_ID,
                 name="Ai Assistant",
                 instructions=directions + "\n format responses in json and only the json portion of the response as a string.",
-                model="gpt-4",
-                tools=tools
+                model="gpt-4o",
+                tools=tools,
+                tool_resources={"file_search": {"vector_store_ids": [self.vector_store.id]}}
             )
-            print("ASSITANT ID:")
+            print("ASSISTANT ID:")
             print(self.ASSISTANT_ID)
 
-
-    def wait_on_run(self, ):
+    def wait_on_run(self):
         """Waits for an OpenAI assistant run to finish and handles the response."""
         print('Waiting for assistant response...')
         while self.run.status == "queued" or self.run.status == "in_progress":
@@ -146,10 +264,8 @@ class Assistant:
         Parameters
         ----------
         """
-        self.message = self.client.beta.threads.messages.create(self.thread.id, role = "user", content = message_text)
+        self.message = self.client.beta.threads.messages.create(self.thread.id, role="user", content=message_text)
         print('\nSending:\n' + show_json(self.message))
         self.run = self.client.beta.threads.runs.create(thread_id=self.thread.id, assistant_id=self.ASSISTANT_ID)
         with open(LOGFILE, 'a+') as f:
             f.write(f'**User:** `{message_text}`\n')
-
-
